@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: Helvetica, Arial, sans-serif;
+            background-color: #e1fbff;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                flex-direction: row;
+            }
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 10px;
+            flex-grow: 1;
+            text-align: center;
+            background-color: #fafafa;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 25px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to &micro;OS!</h1>
+    <h3 id = "time"></h3>
+    <div class="container">
+        <div class="box">
+            <h2>HyperCard</h2>
+            <button onclick="sendRequest('hypercard')">Open</button>
+        </div>
+        <div class="box">
+            <h2>File Editor</h2>
+            <button onclick="sendRequest('editor')">Open</button>
+        </div>
+        <div class="box">
+            <h2>Settings</h2>
+            <button onclick="sendRequest('settings')">Open</button>
+        </div>
+    </div>
+
+    <script>
+        //show time in title
+        setInterval(() => {
+            let timeNow = new Date().toLocaleTimeString();
+            document.getElementById("time").innerHTML = "Time: " + timeNow;
+        }, 1000);
+        function sendRequest(controlName) {
+            fetch("/api/" + controlName)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Network response was not ok");
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    alert("Success! Response: " + data);
+                })
+                .catch(error => {
+                    console.error("There has been a problem with your fetch operation: ", error);
+                });
+        }
+    </script>
+    
+</body>
+</html>
