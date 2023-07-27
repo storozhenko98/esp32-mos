@@ -1,0 +1,12 @@
+{
+    "initial_boot" : true,
+    "ssid" : "your_ssid",
+    "wifi_password" : "your_password",
+    "username" : "your_username",
+    "password" : "your_password",
+    "show_time" : true,
+    "hypercard_setup" : false,
+    "superuser" : true
+    
+
+}

@@ -70,12 +70,14 @@
                     return response.text();
                 })
                 .then(data => {
-                    alert("Success! Response: " + data);
+                    // Navigate to the new page
+                    window.location.href = data;
                 })
                 .catch(error => {
                     console.error("There has been a problem with your fetch operation: ", error);
                 });
         }
+
     </script>
     
 </body>

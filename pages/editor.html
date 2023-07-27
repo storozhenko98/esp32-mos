@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        #editor-container {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        #editor {
+            height: 400px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: monospace;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 5px;
+        }
+        #filename {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #save-button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #save-button:hover {
+            background-color: #0056b3;
+        }
+        #message {
+            margin-top: 10px;
+            width: 100%;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            display: none;
+            color: white;
+        }
+        #message.success {
+            background-color: #28a745;
+        }
+        #message.error {
+            background-color: #dc3545;
+        }
+        @media screen and (max-width: 600px) {
+            body {
+                padding: 20px;
+            }
+            #editor {
+                height: calc(100vh - 400px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="editor-container">
+        <h1>Python IDE</h1>
+        <p>Write some code and click the save button to save it to the server.</p>
+        <input type="text" id="filename" placeholder="Filename">
+        <textarea id="editor"></textarea>
+        <button id="save-button">Save</button>
+        <div id="message"></div>
+    </div>
+    <script>
+        document.getElementById('save-button').addEventListener('click', function() {
+            var code = document.getElementById('editor').value;
+            var name = document.getElementById('filename').value;
+            //strip name of extensions 
+            name = name.split('.')[0]
+            name = name.replace(/\s/g, "_");
+            console.log(code)
+            console.log(typeof(code))
+
+            fetch('/ide/save', {  // assuming '/save' is the endpoint in your Python backend
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'name': name, 'code': code }),
+            })
+            .then(response => response)
+            .then(data => {
+                document.getElementById('message').style.display = 'block';
+                if (data.status === 200) {
+                    document.getElementById('message').textContent = 'File saved successfully!';
+                    document.getElementById('message').className = 'success';
+                } else {
+                    document.getElementById('message').textContent = 'An error occurred!';
+                    document.getElementById('message').className = 'error';
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                document.getElementById('message').style.display = 'block';
+                document.getElementById('message').textContent = 'An error occurred!';
+                document.getElementById('message').className = 'error';
+            });
+        });
+    </script>
+</body>
+</html>
