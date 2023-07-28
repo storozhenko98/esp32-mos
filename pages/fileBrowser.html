@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        #program-container {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 15px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        #program-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        #program-list li {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            font-family: monospace;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #program-list button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        #program-list button:hover {
+            background-color: #0056b3;
+        }
+        @media screen and (max-width: 600px) {
+            body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="program-container">
+        <h1>Available Programs</h1>
+        <ul id="program-list">
+            <!-- Programs will be listed here -->
+        </ul>
+    </div>
+
+    <script>
+        // Function to create a new list item for each program
+        function createListItem(program) {
+            var li = document.createElement("li");
+            var button = document.createElement("button");
+            button.textContent = "Run";
+            button.onclick = function() {
+                fetch('/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 'path': program.path })
+                }).then(response => {
+                    console.log(response);
+                }).catch(error => {
+                    console.error('Error:', error);
+                });
+            };
+            li.textContent = program.name;
+            li.appendChild(button);
+            return li;
+        }
+
+        // Fetch the list of programs from the server
+        fetch('/programs')
+            .then(response => response.json())
+            .then(programs => {
+                var programList = document.getElementById("program-list");
+                for (var program of programs) {
+                    var li = createListItem(program);
+                    programList.appendChild(li);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    </script>
+</body>
+</html>
