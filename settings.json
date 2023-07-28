@@ -5,4 +5,5 @@
     "username":"your_username_future_use",
     "password":"your_password_future_use",
     "openAI_key":"your_openAI_key",
-    "openAI_model":"gpt-4"}
+    "openAI_model":"gpt-4"
+}
