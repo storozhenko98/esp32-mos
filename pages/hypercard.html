@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F0F0F0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        header {
+            color: #333;
+        }
+
+        .card {
+            width: 500px;
+            height: 500px;
+            border: 1px solid #333;
+            margin: 20px;
+            position: relative;
+            background-color: #fff;
+        }
+
+        #inner-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        footer {
+            display: flex;
+            gap: 10px;
+            color: #333;
+        }
+
+        #command {
+            width: 300px;
+            height: 50px;
+            color: #333;
+            background-color: #fff;
+        }
+
+        aside {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            width: 200px;
+            max-height: 100vh;
+            overflow-y: auto;
+            color: #333;
+            background-color: #fff; /* back to white */
+            border-radius: 10px; /* rounded corners */
+            padding: 10px; /* padding around the text */
+            text-align: center; /* centered text */
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 50px;
+            background: #fff;
+            color: #333;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        /* Media query for screens narrower than 600px */
+        @media screen and (max-width: 600px) {
+            .card {
+                width: 80%; /* Make the card narrower */
+                height: 80%; /* Make the card shorter */
+            }
+
+            #command {
+                width: 80%; /* Make the text box narrower */
+            }
+
+            aside {
+                width: 100%; /* Make the command history the full width of the screen */
+                position: static; /* Position it normally in the flow of the page */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>HyperCard 2.0</h1>
+    </header>
+    <div id="card" class="card">
+        <div id="inner-card"></div>
+    </div>
+    <footer>
+        <textarea id="command" placeholder="Enter your command here"></textarea>
+        <button id="submit">Submit</button>
+        <button id="publish">Publish</button>
+        <button id="browse">Browse</button>
+        <button id="clear">Clear</button>
+    </footer>
+    <aside>
+        <h2>Command History</h2>
+        <ul id="history"></ul>
+    </aside>
+
+    <div id="modal" class="modal">
+        <label>
+            Text:
+            <input id="modal-text" type="text">
+        </label>
+        <label>
+            Color:
+            <input id="modal-color" type="color">
+        </label>
+        <button id="modal-save">Save</button>
+        <button id="modal-cancel">Cancel</button>
+    </div>
+
+    <script>
+        let key = null; // Variable to store the OpenAI key
+        let model = null; // Variable to store the OpenAI model
+
+        let targetElement = null; // Variable to store the clicked element
+        fetch('/get_data')
+        .then(response => response.json())
+        .then(data => {
+            // Set variables
+            model = data.openAI_model;
+            key = data.openAI_key;
+            
+            // Log or use the variables here...
+            console.log(`Model: ${model}, Key: ${key}`);
+        })
+        .catch(error => console.error('Error:', error));
+
+
+        // Function to handle the command
+        function handleCommand() {
+            let command = document.getElementById('command').value;
+            let divContents = document.getElementById('card').innerHTML;
+            let data = {
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": `You are HyperCardGPT, an AI designed to generate HTML code that is injected 
+                            into a specific HTML structure. Your task involves creating content that will fit within 
+                            an inner div, tagged as 'inner-card', nested inside an outer div, tagged as 'card'. 
+                            Always ensure that the content is returned within the tags <div id="inner-card"></div>. 
+                            Remember, under no circumstances should you alter the height, width, or any other properties 
+                            of the inner div that might affect the outer div. Maintain the dimensions of the inner div and 
+                            make it vertically scrollable if needed, ensuring it is always fully enclosed by the outer div. 
+                            You will receive the current state of the div and a command to implement. Respond with the updated 
+                            inner HTML that fulfills the command—no explanations, no markdown, just pure HTML and inline CSS. 
+                            Make certain that any element you add has a unique tag, avoiding repetition. Here's your current 
+                            div: ${divContents} and your command: ${command}. Follow all instructions diligently.`
+                        }
+                    ]
+                };
+            console.log(data)
+            console.log(data.messages)
+            fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + key
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // do something with the response...
+                code = data['choices'][0]['message']['content'];
+                document.getElementById('card').innerHTML = code;
+                console.log(code);
+            })
+            .catch(error => console.error(error));
+
+            // Add the command to the history
+            let li = document.createElement('li');
+            li.textContent = command;
+            document.getElementById('history').appendChild(li);
+
+            // Clear the command input
+            document.getElementById('command').value = '';
+        }
+
+        // Event listener for the submit button
+        document.getElementById('submit').addEventListener('click', handleCommand);
+
+        // Event listener for the Enter key in the text box
+        document.getElementById('command').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevents the default action (form submission)
+                handleCommand();
+            }
+        });
+
+        // Event listener for clicks in the card div
+        document.getElementById('card').addEventListener('click', function(event) {
+            document.getElementById('command').value = 'Regarding ' + event.target.id + ': ';
+        });
+
+        // Event listener for clicks on any child of the card div
+        document.getElementById('card').addEventListener('click', function(event) {
+            if (event.target.id !== 'card') { // Ignore clicks on the card itself
+                targetElement = event.target; // Store the clicked element
+                let modal = document.getElementById('modal');
+                modal.style.display = 'block'; // Show the modal
+                document.getElementById('modal-text').value = targetElement.textContent; // Populate the text input with the current text
+            }
+        });
+
+        // Event listener for the Save button in the modal
+        document.getElementById('modal-save').addEventListener('click', function() {
+            if (targetElement) { // If an element was clicked
+                targetElement.textContent = document.getElementById('modal-text').value; // Update the text
+                targetElement.style.color = document.getElementById('modal-color').value; // Update the color
+            }
+            document.getElementById('modal').style.display = 'none'; // Hide the modal
+        });
+
+
+        //publish to server 
+        document.getElementById('publish').addEventListener('click', function() {
+            const title = prompt("Enter a title for your card: ");
+            const author = prompt("Enter your name: ");
+            let cardHtml = document.getElementById('card').outerHTML;
+            let blob = new Blob([cardHtml], {type: 'text/html'});
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement('a');
+            link.href = url;
+            link.download = `${title}_${author}.html`;
+            link.click();
+            //publish to server
+            fetch('/publish', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    html: cardHtml,
+                    title: title,
+                    author: author
+                })
+            })
+            .then(response => response.text())
+            .then(text => {
+                // do something with the response...
+                console.log(text);
+            })
+            .catch(error => console.error(error));
+        }
+        );
+
+        // Event listener for the browse button to go to cards home html
+        document.getElementById('browse').addEventListener('click', function() {
+            window.location.href = './cardBrowser.html';
+        }
+        );
+
+        //event listener for div clear
+        document.getElementById('clear').addEventListener('click', function() {
+            document.getElementById('inner-card').innerHTML = '';
+        }
+        );
+
+        //modal cancel 
+        document.getElementById('modal-cancel').addEventListener('click', function() {
+            document.getElementById('modal').style.display = 'none';
+        }
+        );
+    </script>
+</body>
+</html>

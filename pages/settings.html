@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            width: 100%;
+            gap: 10px;
+        }
+        input[type="submit"] {
+            align-self: flex-end;
+            padding: 10px;
+        }
+        @media (max-width: 600px) {
+            form {
+                width: 100%;
+                padding: 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Settings Form</h1>
+    <form id="settings-form">
+        <label for="ssid">SSID:</label>
+        <input type="text" id="ssid">
+        <label for="wifi_password">WiFi Password:</label>
+        <input type="password" id="wifi_password">
+        <label for="username">Username:</label>
+        <input type="text" id="username">
+        <label for="password">Password:</label>
+        <input type="password" id="password">
+        <label for="openAI_key">OpenAI Key:</label>
+        <input type="text" id="openAI_key">
+        <label for="openAI_model">OpenAI Model:</label>
+        <input type="text" id="openAI_model">
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        // JSON data
+        let data = {
+            "initial_boot" : true,
+            "ssid" : "your_ssid",
+            "wifi_password" : "your_password",
+            "username" : "your_username",
+            "password" : "your_password",
+            "openAI_key" : "your_key",
+            "openAI_model" : "gpt-3.5-turbo"
+        };
+
+        // Populate form fields from JSON
+        for (let key in data) {
+            let el = document.getElementById(key);
+            if (el) {
+                if (el.type === 'checkbox') {
+                    el.checked = data[key];
+                } else {
+                    el.value = data[key];
+                }
+            }
+        }
+
+        // Form submit event handler
+        document.getElementById('settings-form').addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent form from being submitted
+
+            // Save form data to JSON
+            let formData = { "initial_boot" : false };
+            for (let key in data) {
+                if (key !== "initial_boot") {
+                    let el = document.getElementById(key);
+                    if (el) {
+                        formData[key] = el.type === 'checkbox' ? el.checked : el.value;
+                    }
+                }
+            }
+
+            console.log(JSON.stringify(formData));
+
+            // Send JSON to the server...
+            fetch('/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response)
+            .then(data =()=> {
+                console.log('Success:', data);
+                let m = document.createElement('p');
+                m.innerText = "Settings saved! Your device will now reboot. Refresh the page in a few minutes to see the changes.";
+                document.body.appendChild(m);
+            }
+            )
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Published Cards</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F0F0F0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #cards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        #cards div {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #cards h2 {
+            margin: 0;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #cards p {
+            color: #666;
+        }
+
+        #cards a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        #cards a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Published Cards</h1>
+    
+    <div id="cards"><div> 
+        <h2>Create a Card</h2>
+         <a href="../pages/hypercard.html">Click here</a></div></div>
+    <script>
+        const cards = document.getElementById('cards');
+        fetch('/cards')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(card => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.innerHTML = `
+                        <h2>${card.title}</h2>
+                        <p>${card.author}</p>
+                        <a href="${card.link}">View</a>
+                    `;
+                    cards.appendChild(cardDiv);
+                });
+            });
+    </script>
+</body>
+</html>

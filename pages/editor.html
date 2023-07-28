@@ -72,6 +72,26 @@
         #message.error {
             background-color: #dc3545;
         }
+
+        #ai-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #ai-button:hover {
+            background-color: #5a6268;
+        }
+        #loading-spinner {
+            display: none;
+            margin: 10px auto;
+        }
+
         @media screen and (max-width: 600px) {
             body {
                 padding: 20px;
@@ -90,8 +110,79 @@
         <textarea id="editor"></textarea>
         <button id="save-button">Save</button>
         <div id="message"></div>
+        <button id="ai-button">AI my Code</button>
+        <svg id="loading-spinner" width="50" height="50">
+            <circle cx="25" cy="25" r="20" stroke="#007BFF" stroke-width="5" fill="none" />
+        </svg>
     </div>
     <script>
+            let key = null;
+            let model = null;
+
+            fetch('/get_data')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.openAI_model)
+                // Set variables
+                model = data.openAI_model;
+                key = data.openAI_key;
+                
+                // Log or use the variables here...
+                console.log(`Model: ${model}, Key: ${key}`);
+            })
+            .catch(error => console.error('Error:', error));
+
+
+            document.getElementById('ai-button').addEventListener('click', function() {
+                var code = document.getElementById('editor').value;
+
+                // Show loading spinner
+                document.getElementById('loading-spinner').style.display = 'block';
+
+                var data = {
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": `You are pyGPT. You receive 
+                            python code and you return corrected 
+                            python code with # comments that 
+                            indicate what you did, why it is better
+                            and advice too. You only return executable code 
+                            and nothing else, no markdown and no 
+                            other symbols, just pure code. Here 
+                            is the code for you to work on: ${code}`
+                        }
+                    ]
+                };
+
+                fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + key
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading spinner
+                    document.getElementById('loading-spinner').style.display = 'none';
+
+                    // Replace code in editor with the AI's response
+                    var ai_response = data['choices'][0]['message']['content'];
+                    document.getElementById('editor').value = ai_response;
+                })
+                .catch((error) => {
+                    // Hide loading spinner
+                    document.getElementById('loading-spinner').style.display = 'none';
+
+                    console.error('Error:', error);
+                    document.getElementById('message').style.display = 'block';
+                    document.getElementById('message').textContent = 'An error occurred!';
+                    document.getElementById('message').className = 'error';
+                });
+            });
         document.getElementById('save-button').addEventListener('click', function() {
             var code = document.getElementById('editor').value;
             var name = document.getElementById('filename').value;
