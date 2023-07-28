@@ -238,12 +238,6 @@
             const title = prompt("Enter a title for your card: ");
             const author = prompt("Enter your name: ");
             let cardHtml = document.getElementById('card').outerHTML;
-            let blob = new Blob([cardHtml], {type: 'text/html'});
-            let url = URL.createObjectURL(blob);
-            let link = document.createElement('a');
-            link.href = url;
-            link.download = `${title}_${author}.html`;
-            link.click();
             //publish to server
             fetch('/publish', {
                 method: 'POST',
