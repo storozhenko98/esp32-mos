@@ -1,8 +1,8 @@
 from microdot import send_file, Microdot, Response
 import ujson
 import os
-#import network 
-#import machine
+import network 
+import machine
 
 #boot stuff
 settings = {}
@@ -12,22 +12,24 @@ with open('settings.json') as f:
 
 ####\/\/\/\/\/\/\/#####BOOT#####
 #set up wifi
-#if settings['initial_boot'] == True:
-#    ap = network.WLAN(network.AP_IF)
-#    ap.active(True)
-#    ap.config(essid='MyESP32AP', password='mysecretpassword')
-#    print('network config:', ap.ifconfig())
-#
-#if settings['initial_boot'] == False:
-#    ssid = settings['ssid']
-#    wifi_password = settings['wifi_password']
-#    sta_if = network.WLAN(network.STA_IF)
-#    sta_if.active(True)
-#    sta_if.connect(ssid, wifi_password)
-#    while not sta_if.isconnected():
-#        pass
-#    print('network config:', sta_if.ifconfig())
-#
+if settings['initial_boot'] == True:
+    ap = network.WLAN(network.AP_IF)
+    ap.active(True)
+    ap.config(essid='MyESP32AP', password='mysecretpassword')
+    print('network config:', ap.ifconfig())
+    print('remember to put ip followed by port, mine was port :5000')
+
+if settings['initial_boot'] == False:
+    ssid = settings['ssid']
+    wifi_password = settings['wifi_password']
+    sta_if = network.WLAN(network.STA_IF)
+    sta_if.active(True)
+    sta_if.connect(ssid, wifi_password)
+    while not sta_if.isconnected():
+        pass
+    print('network config:', sta_if.ifconfig())
+    print('remember to put ip followed by port, mine was port :5000')
+
 ###^^^^^^#####
 #init microdot
 app = Microdot()
@@ -144,7 +146,7 @@ def settingsReq(request):
     reqOBJ = request.json
     with open('settings.json', 'w') as f:
         ujson.dump(reqOBJ, f)
-    #machine.reset()
+    machine.reset()
     return Response('OK')
 
 ###settings json get

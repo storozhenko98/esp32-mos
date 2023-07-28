@@ -1,8 +1,8 @@
 {
-    "initial_boot":false,
+    "initial_boot":true,
     "ssid":"your_ssid",
     "wifi_password":"your_password",
-    "username":"your_username",
-    "password":"your_password",
+    "username":"your_username_future_use",
+    "password":"your_password_future_use",
     "openAI_key":"your_openAI_key",
     "openAI_model":"gpt-4"}
